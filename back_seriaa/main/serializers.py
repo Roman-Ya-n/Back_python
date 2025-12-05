@@ -25,6 +25,23 @@ class StadiumBaseSerializer(serializers.ModelSerializer):
         model = Stadium
         fields = ['stadium_id', 'stadium_name', 'stadium_team', 'capacity', 'city']
 
+class CalendarCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Calendar
+        fields = ['event_date', 'event_stadium']
+
+
+class HistoryCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = History
+        fields = ['year', 'win_team', 'win_coach']
+
+
+class MatchCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Match
+        fields = ['match_id', 'home_team', 'away_team', 'home_team_score', 'away_team_score']
+
 
 class PlayerTechnicalBaseSerializer(serializers.ModelSerializer):
     class Meta:

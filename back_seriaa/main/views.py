@@ -2,6 +2,7 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from .models import (
     Team, Coach, Stadium, Calendar, 
     History, Match, PlayerDetailed, PlayerTechnical
@@ -16,135 +17,171 @@ from .serializers import (
     PlayerDetailedBaseSerializer, PlayerDetailedDetailSerializer, PlayerDetailedCreateSerializer,
     PlayerTechnicalBaseSerializer, PlayerTechnicalDetailSerializer, PlayerTechnicalCreateSerializer
 )
-from .repositories import (
-    TeamRepository, CoachRepository, StadiumRepository,
-    CalendarRepository, HistoryRepository, MatchRepository,
-    PlayerDetailedRepository, PlayerTechnicalRepository
-)
 
+from .repositories.team_repository import TeamRepository
+from .repositories.coach_repository import CoachRepository
+from .repositories.stadium_repository import StadiumRepository
+from .repositories.calendar_repository import CalendarRepository
+from .repositories.history_repository import HistoryRepository
+from .repositories.match_repository import MatchRepository
+from .repositories.player_detailed_repository import PlayerDetailedRepository
+from .repositories.player_technical_repository import PlayerTechnicalRepository
 
-class TeamViewSet(viewsets.ModelViewSet):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.repository = TeamRepository()
-    
-    def get_serializer_class(self):
-        if self.action == 'list':
-            return TeamBaseSerializer
-        elif self.action == 'retrieve':
-            return TeamDetailSerializer
-        elif self.action == 'create':
-            return TeamCreateSerializer
-        return TeamBaseSerializer
-    
-class CoachViewSet(viewsets.ModelViewSet):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.repository = CoachRepository()
-    
-    def get_serializer_class(self):
-        if self.action == 'list':
-            return CoachBaseSerializer
-        elif self.action == 'retrieve':
-            return CoachDetailSerializer
-        elif self.action == 'create':
-            return CoachCreateSerializer
-        return CoachBaseSerializer
+# main/views.py
+from rest_framework import viewsets, status
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
-class StadiumViewSet(viewsets.ModelViewSet):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.repository = StadiumRepository()
+class BaseViewSet(viewsets.ModelViewSet):
+    
+    http_method_names = ['get', 'post', 'put', 'patch', 'delete', 'head', 'options']
+    
+    # These should be defined in child classes
+    base_serializer_class = None
+    detail_serializer_class = None  
+    create_serializer_class = None
+    repository_class = None
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.repository_class:
+            self.repo = self.repository_class()
+        else:
+            raise ValueError("repository_class must be defined in child class")
     
     def get_serializer_class(self):
         if self.action == 'list':
-            return StadiumBaseSerializer
+            return self.base_serializer_class
         elif self.action == 'retrieve':
-            return StadiumDetailSerializer
-        elif self.action == 'create':
-            return StadiumCreateSerializer
-        return StadiumBaseSerializer
-    
-class CalendarViewSet(viewsets.ModelViewSet):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.repository = CalendarRepository()
-    
-    def get_serializer_class(self):
-        if self.action == 'list':
-            return CalendarBaseSerializer
-        elif self.action == 'retrieve':
-            return CalendarDetailSerializer
-        elif self.action == 'create':
-            return CalendarCreateSerializer
-        return CalendarBaseSerializer
-    
-class HistoryViewSet(viewsets.ModelViewSet):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.repository = HistoryRepository()
-    
-    def get_serializer_class(self):
-        if self.action == 'list':
-            return HistoryBaseSerializer
-        elif self.action == 'retrieve':
-            return HistoryDetailSerializer
-        elif self.action == 'create':
-            return HistoryCreateSerializer
-        return HistoryBaseSerializer
+            return self.detail_serializer_class
+        elif self.action in ['create', 'update', 'partial_update']:
+            return self.create_serializer_class
+        return self.base_serializer_class
 
-class MatchViewSet(viewsets.ModelViewSet):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.repository = MatchRepository()
+    def get_queryset(self):
+        return self.repo.get_all()
+
+    def retrieve(self, request, pk=None):
+        item = self.repo.get_by_id(pk)
+        if not item:
+            return Response({"error": "Item not found"}, status=404)
+        serializer = self.get_serializer(item)
+        return Response(serializer.data)
+
+    def create(self, request):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            item = self.repo.create(**serializer.validated_data)
+            return Response(self.base_serializer_class(item).data, status=201)
+        return Response(serializer.errors, status=400)
+
+    def update(self, request, pk=None):
+        item = self.repo.get_by_id(pk)
+        if not item:
+            return Response({"error": "Item not found"}, status=404)
+        
+        serializer = self.get_serializer(item, data=request.data)
+        if serializer.is_valid():
+            updated_item = self.repo.update(pk, serializer.validated_data)
+            return Response(self.base_serializer_class(updated_item).data)
+        return Response(serializer.errors, status=400)
+
+    def destroy(self, request, pk=None):
+        success = self.repo.delete(pk)
+        if not success:
+            return Response({"error": "Item not found"}, status=404)
+        return Response(status=204)
     
-    def get_serializer_class(self):
-        if self.action == 'list':
-            return MatchBaseSerializer
-        elif self.action == 'retrieve':
-            return MatchDetailSerializer
-        elif self.action == 'create':
-            return MatchCreateSerializer
-        return MatchBaseSerializer
-    
-class PlayerDetailedViewSet(viewsets.ModelViewSet):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.repository = PlayerDetailedRepository()
-    
-    def get_serializer_class(self):
-        if self.action == 'list':
-            return PlayerDetailedBaseSerializer
-        elif self.action == 'retrieve':
-            return PlayerDetailedDetailSerializer
-        elif self.action == 'create':
-            return PlayerDetailedCreateSerializer
-        return PlayerDetailedBaseSerializer 
-    
-class PlayerTechnicalViewSet(viewsets.ModelViewSet):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.repository = PlayerTechnicalRepository()
-    
-    def get_serializer_class(self):
-        if self.action == 'list':
-            return PlayerTechnicalBaseSerializer
-        elif self.action == 'retrieve':
-            return PlayerTechnicalDetailSerializer
-        elif self.action == 'create':
-            return PlayerTechnicalCreateSerializer
-        return PlayerTechnicalBaseSerializer
+# Team ViewSet
+class TeamViewSet(BaseViewSet):
+    base_serializer_class = TeamBaseSerializer
+    detail_serializer_class = TeamDetailSerializer
+    create_serializer_class = TeamCreateSerializer
+    repository_class = TeamRepository
+    queryset = Team.objects.all()
+
+# Coach ViewSet  
+class CoachViewSet(BaseViewSet):
+    base_serializer_class = CoachBaseSerializer
+    detail_serializer_class = CoachDetailSerializer
+    create_serializer_class = CoachCreateSerializer
+    repository_class = CoachRepository
+    queryset = Coach.objects.all()  
+
+# Stadium ViewSet
+class StadiumViewSet(BaseViewSet):
+    base_serializer_class = StadiumBaseSerializer
+    detail_serializer_class = StadiumDetailSerializer
+    create_serializer_class = StadiumCreateSerializer
+    repository_class = StadiumRepository
+    queryset = Stadium.objects.all()  
+
+# Calendar ViewSet
+class CalendarViewSet(BaseViewSet):
+    base_serializer_class = CalendarBaseSerializer
+    detail_serializer_class = CalendarDetailSerializer
+    create_serializer_class = CalendarCreateSerializer
+    repository_class = CalendarRepository
+    queryset = Calendar.objects.all()  
+
+# History ViewSet
+class HistoryViewSet(BaseViewSet):
+    base_serializer_class = HistoryBaseSerializer
+    detail_serializer_class = HistoryDetailSerializer
+    create_serializer_class = HistoryCreateSerializer
+    repository_class = HistoryRepository
+    queryset = History.objects.all()  
+
+# Match ViewSet
+class MatchViewSet(BaseViewSet):
+    base_serializer_class = MatchBaseSerializer
+    detail_serializer_class = MatchDetailSerializer
+    create_serializer_class = MatchCreateSerializer
+    repository_class = MatchRepository
+    queryset = Match.objects.all()  
+
+# PlayerDetailed ViewSet
+class PlayerDetailedViewSet(BaseViewSet):
+    base_serializer_class = PlayerDetailedBaseSerializer
+    detail_serializer_class = PlayerDetailedDetailSerializer
+    create_serializer_class = PlayerDetailedCreateSerializer
+    repository_class = PlayerDetailedRepository
+    queryset = PlayerDetailed.objects.all()  
+
+# PlayerTechnical ViewSet
+class PlayerTechnicalViewSet(BaseViewSet):
+    base_serializer_class = PlayerTechnicalBaseSerializer
+    detail_serializer_class = PlayerTechnicalDetailSerializer
+    create_serializer_class = PlayerTechnicalCreateSerializer
+    repository_class = PlayerTechnicalRepository
+    queryset = PlayerTechnical.objects.all()  
 
 class ReportViewSet(viewsets.ViewSet):
+    
+    queryset = Team.objects.all()
+    
+    def list(self, request):
+        return Response({
+            "message": "Використовуй /api/report/simple-stats/ для звіту",
+            "available_actions": ["simple-stats"]
+        })
+    
     @action(detail=False, methods=['get'])
-    def team_stats(self, request):
-        # Агрегація даних через репозиторії
-        team_repo = TeamRepository()
-        player_repo = PlayerTechnicalRepository()
+    def simple_stats(self, request):
+        """Найпростіший звіт тільки з кількістю записів"""
+        repos = {
+            'teams': TeamRepository(),
+            'coaches': CoachRepository(),
+            'stadiums': StadiumRepository(), 
+            'players': PlayerTechnicalRepository(),
+            'matches': MatchRepository()
+        }
         
         report = {
-            "total_teams": team_repo.get_team_count(),
-            "top_scoring_teams": team_repo.get_top_teams_by_points(5),
-            "player_stats": player_repo.get_top_scorers(10)
+            "summary": {
+                entity: repo.get_all().count()
+                for entity, repo in repos.items()
+            },
+            "total_records": sum(repo.get_all().count() for repo in repos.values())
         }
         return Response(report)
