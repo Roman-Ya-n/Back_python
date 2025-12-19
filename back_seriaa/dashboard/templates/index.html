@@ -1,0 +1,159 @@
+<!-- dashboard/templates/index.html -->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Футбольний Дашборд - Головна</title>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">⚽ Футбольний Аналіз</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'dashboard_home' %}">Головна</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'plotly_dashboard' %}">Plotly Графіки</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'bokeh_dashboard' %}">Bokeh Графіки</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h1 class="mb-4">Футбольний Дашборд - Статистика Seria A</h1>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>📊 Доступні API Ендпоінти</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                <a href="/dashboard/api/teams/goal-difference/" target="_blank">
+                                    Команди з найкращою різницею голів
+                                </a>
+                            </li>
+                            <li class="list-group-item">
+                                <a href="/dashboard/api/players/avg-age/" target="_blank">
+                                    Середній вік гравців по командах
+                                </a>
+                            </li>
+                            <li class="list-group-item">
+                                <a href="/dashboard/api/history/wins-by-year/" target="_blank">
+                                    Перемоги команд по роках
+                                </a>
+                            </li>
+                            <li class="list-group-item">
+                                <a href="/dashboard/api/players/top/" target="_blank">
+                                    Топ гравців (голи + асисти)
+                                </a>
+                            </li>
+                            <li class="list-group-item">
+                                <a href="/dashboard/api/matches/by-month/" target="_blank">
+                                    Матчі по місяцях
+                                </a>
+                            </li>
+                            <li class="list-group-item">
+                                <a href="/dashboard/api/coaches/by-country/" target="_blank">
+                                    Тренери по країнах
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>📈 Візуалізація</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'plotly_dashboard' %}" class="btn btn-primary btn-lg">
+                                🎨 Plotly Дашборд (6 графіків)
+                            </a>
+                            <a href="{% url 'bokeh_dashboard' %}" class="btn btn-success btn-lg">
+                                📊 Bokeh Дашборд (6 графіків)
+                            </a>
+                        </div>
+                        <p class="mt-3 text-muted">
+                            Всього: 12 графіків (6 Plotly + 6 Bokeh)
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5>🔍 Фільтрація даних</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="filterForm">
+                            <div class="mb-3">
+                                <label for="teamFilter" class="form-label">Фільтр по команді:</label>
+                                <input type="text" class="form-control" id="teamFilter" 
+                                       placeholder="Введіть назву команди...">
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label for="yearFrom" class="form-label">Рік від:</label>
+                                    <input type="number" class="form-control" id="yearFrom" 
+                                           min="2000" max="2024" value="2010">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="yearTo" class="form-label">Рік до:</label>
+                                    <input type="number" class="form-control" id="yearTo" 
+                                           min="2000" max="2024" value="2024">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-warning mt-3 w-100">
+                                Застосувати фільтри
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5>📋 Статистичний аналіз (приклад)</h5>
+            </div>
+            <div class="card-body">
+                <div id="statsContainer">
+                    <p>Натисніть на посилання API для перегляду статистики...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Приклад AJAX запиту для фільтрації
+        document.getElementById('filterForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const team = document.getElementById('teamFilter').value;
+            const yearFrom = document.getElementById('yearFrom').value;
+            const yearTo = document.getElementById('yearTo').value;
+            
+            const url = `/dashboard/api/history/wins-by-year/?team=${team}&year_from=${yearFrom}&year_to=${yearTo}`;
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Фільтровані дані:', data);
+                    alert(`Знайдено ${data.data.length} записів`);
+                });
+        });
+    </script>
+</body>
+</html>

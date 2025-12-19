@@ -10,7 +10,7 @@ from .models import (
     Team, Coach, Stadium, Calendar, 
     History, Match, PlayerDetailed, PlayerTechnical
 )
-from .serializers import (
+from ..serializers import (
     TeamBaseSerializer, TeamDetailSerializer, TeamCreateSerializer,
     CoachBaseSerializer, CoachDetailSerializer, CoachCreateSerializer,
     StadiumBaseSerializer, StadiumDetailSerializer, StadiumCreateSerializer,
