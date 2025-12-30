@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plotly Дашборд</title>
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'dashboard_home' %}">На головну</a>
+            <span class="navbar-text text-white"><br>Plotly Дашборд - 6 графіків</span>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <!-- Графік 1 -->
+            <div class="col-lg-6">
+                <div class="chart-container">
+                    <h4 class="chart-title">1. Команди за різницею голів</h4>
+                    <div id="chart1">{{ plotly_chart1|safe }}</div>
+                </div>
+            </div>
+            
+            <!-- Графік 2 -->
+            <div class="col-lg-6">
+                <div class="chart-container">
+                    <h4 class="chart-title">2. Середній вік по командах</h4>
+                    <div id="chart2">{{ plotly_chart2|safe }}</div>
+                </div>
+            </div>
+            
+            <!-- Графік 3 -->
+            <div class="col-12">
+                <div class="chart-container">
+                    <h4 class="chart-title">3. Перемоги команд по роках</h4>
+                    <div id="chart3">{{ plotly_chart3|safe }}</div>
+                </div>
+            </div>
+            
+            <!-- Графік 4 -->
+            <div class="col-12">
+                <div class="chart-container">
+                    <h4 class="chart-title">4. Гравці: Голи vs Асисти</h4>
+                    <div id="chart4">{{ plotly_chart4|safe }}</div>
+                </div>
+            </div>
+            
+            <!-- Графік 5 -->
+            <div class="col-lg-6">
+                <div class="chart-container">
+                    <h4 class="chart-title">5. Матчі по місяцях</h4>
+                    <div id="chart5">{{ plotly_chart5|safe }}</div>
+                </div>
+            </div>
+            
+            <!-- Графік 6 -->
+            <div class="col-lg-6">
+                <div class="chart-container">
+                    <h4 class="chart-title">6. Тренери по країнах</h4>
+                    <div id="chart6">{{ plotly_chart6|safe }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

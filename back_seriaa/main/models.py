@@ -1,7 +1,5 @@
 from django.db import models
 
-from django.db import models
-
 class Team(models.Model):
     team_id = models.AutoField(primary_key=True)
     team_name = models.CharField(max_length=100, unique=True)
@@ -83,8 +81,28 @@ class Match(models.Model):
         return f"{self.home_team} vs {self.away_team}"
 
 
+class PlayerTechnical(models.Model):
+    player_id = models.AutoField(primary_key=True)
+    player_name = models.CharField(max_length=255)
+    player_team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True)
+    position = models.CharField(max_length=50, null=True)
+    goal_scored = models.IntegerField(default=0)
+    assist_scored = models.IntegerField(default=0)
+
+    class Meta:
+        db_table = 'players_technical'
+
+    def __str__(self):
+        return self.player_name
+
+
 class PlayerDetailed(models.Model):
-    player_detailed_id = models.IntegerField(primary_key=True)
+    player_detailed_id = models.ForeignKey(
+        PlayerTechnical, 
+        on_delete=models.CASCADE,
+        primary_key=True,
+        db_column='player_detailed_id'
+    )
     player_physic = models.IntegerField(null=True)
     player_country = models.CharField(max_length=2, null=True)
     player_age = models.IntegerField(null=True)
@@ -101,17 +119,4 @@ class PlayerDetailed(models.Model):
         return f"{self.player_country} ({self.player_foot})"
 
 
-class PlayerTechnical(models.Model):
-    player_id = models.AutoField(primary_key=True)
-    player_name = models.CharField(max_length=255)
-    player_team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True)
-    position = models.CharField(max_length=50, null=True)
-    goal_scored = models.IntegerField(default=0)
-    assist_scored = models.IntegerField(default=0)
-
-    class Meta:
-        db_table = 'players_technical'
-
-    def __str__(self):
-        return self.player_name
 

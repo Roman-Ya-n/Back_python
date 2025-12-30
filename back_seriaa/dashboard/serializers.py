@@ -1,6 +1,6 @@
 # main/serializers.py
 from rest_framework import serializers
-from .main.models import (
+from main.models import (
     Team, Coach, Stadium, Calendar, 
     History, Match, PlayerDetailed, PlayerTechnical
 )

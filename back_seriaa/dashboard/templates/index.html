@@ -7,25 +7,6 @@
     <title>Футбольний Дашборд - Головна</title>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="#">⚽ Футбольний Аналіз</a>
-            <div class="collapse navbar-collapse">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="{% url 'dashboard_home' %}">Головна</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'plotly_dashboard' %}">Plotly Графіки</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'bokeh_dashboard' %}">Bokeh Графіки</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-
     <div class="container mt-4">
         <h1 class="mb-4">Футбольний Дашборд - Статистика Seria A</h1>
         
@@ -33,7 +14,7 @@
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-header">
-                        <h5>📊 Доступні API Ендпоінти</h5>
+                        <h5>Доступні API Ендпоінти</h5>
                     </div>
                     <div class="card-body">
                         <ul class="list-group">
@@ -75,20 +56,19 @@
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-header">
-                        <h5>📈 Візуалізація</h5>
+                        <h5>Візуалізація</h5>
                     </div>
                     <div class="card-body">
                         <div class="d-grid gap-2">
-                            <a href="{% url 'plotly_dashboard' %}" class="btn btn-primary btn-lg">
-                                🎨 Plotly Дашборд (6 графіків)
-                            </a>
-                            <a href="{% url 'bokeh_dashboard' %}" class="btn btn-success btn-lg">
-                                📊 Bokeh Дашборд (6 графіків)
-                            </a>
+                            <ul>
+                                <li><a href="{% url 'plotly_dashboard' %}" class="btn btn-primary btn-lg">
+                                    Plotly Дашборд (6 графіків)
+                                </a></li>
+                                <li><a href="{% url 'bokeh_dashboard' %}" class="btn btn-success btn-lg">
+                                    Bokeh Дашборд (6 графіків)
+                                </a></li>
+                            </ul>
                         </div>
-                        <p class="mt-3 text-muted">
-                            Всього: 12 графіків (6 Plotly + 6 Bokeh)
-                        </p>
                     </div>
                 </div>
                 

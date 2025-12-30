@@ -3,6 +3,8 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from main import views
 
+from django.urls import path, include
+
 router = DefaultRouter()
 router.register(r'teams', views.TeamViewSet, basename='team')
 router.register(r'coach', views.CoachViewSet, basename='coach')
